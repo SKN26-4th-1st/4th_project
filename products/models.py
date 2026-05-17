@@ -46,20 +46,32 @@ def _convert_value(field, value):
 
 
 def _convert_filter_value(field, lookup, value):
-    if lookup == "in":
+    if lookup in ("in", "icontains"):
         if isinstance(value, str):
-            values = [item.strip() for item in value.split(",")]
+            values = [item.strip() for item in value.split(",")] if lookup == "in" else [value]
         else:
             values = value
 
         if not isinstance(values, (list, tuple, set)):
             values = [values]
 
-        converted_values = [
-            converted
-            for item in values
-            if (converted := _convert_value(field, item)) is not None
-        ]
+        if lookup == "in":
+            converted_values = [
+                converted
+                for item in values
+                if (converted := _convert_value(field, item)) is not None
+            ]
+            return converted_values or None
+
+        converted_values = []
+        for item in values:
+            if item is None:
+                continue
+
+            converted = str(item).strip()
+            if converted:
+                converted_values.append(converted)
+
         return converted_values or None
 
     return _convert_value(field, value)
@@ -81,13 +93,14 @@ def _split_condition_key(key, field_names):
 
 
 def search_model(model, range, conditions):
-    ignores = ["product_code"]
+    ignores = []
     fields = {
         field.name: field
         for field in model._meta.fields
         if field.name not in ignores
     }
     filters = {}
+    icontains_filters = []
 
     if range and "product_code" in {field.name for field in model._meta.fields}:
         filters["product_code__in"] = range
@@ -111,9 +124,20 @@ def search_model(model, range, conditions):
         if converted_value is None:
             continue
 
+        if lookup == "icontains":
+            icontains_filters.extend(
+                (field_name, item)
+                for item in converted_value
+            )
+            continue
+
         filters[f"{field_name}__{lookup}"] = converted_value
 
-    return model.objects.filter(**filters)
+    queryset = model.objects.filter(**filters)
+    for field_name, value in icontains_filters:
+        queryset = queryset.filter(**{f"{field_name}__icontains": value})
+
+    return queryset
 
 
 class ScreenResolution(models.Model):

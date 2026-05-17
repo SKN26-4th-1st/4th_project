@@ -12,7 +12,7 @@ index = pc.Index(host=pinecone_host)
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 
-def search_manual(query:str) -> list[dict]:
+def search_manual(product_type:str, query:str) -> list[dict]:
     global index, client
 
     response = client.embeddings.create(
@@ -26,7 +26,8 @@ def search_manual(query:str) -> list[dict]:
         namespace="user_manual",
         vector=query_vector,
         top_k=5,
-        include_metadata=True
+        include_metadata=True,
+        filter={"product_code_header": {"$eq": product_type}}
     )
 
     matches = []
