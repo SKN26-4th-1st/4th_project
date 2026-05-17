@@ -77,3 +77,29 @@ def search_test(code, ls, dct):
         print(r)
 
     return res
+
+"""
+from dotenv import load_dotenv
+from debug import *
+from common import llm
+from pprint import pprint
+
+load_dotenv()
+state = mockup_state()
+"""
+def mockup_state():
+    return {
+        # 사용자 id
+        "user_id": 11,
+
+        # 현재 대화 상태
+        "state": "initial",
+
+        # 제품군 / 슬롯
+        "product_type": "ACT",
+        "slots": {"price_gte": 1000000},
+
+        # DB 검색 결과
+        "result_count": 3,
+        "search_results": ["ACT010", "ACT015", "ACT020"]
+    }

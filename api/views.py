@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from accounts.models import UserFavorite
 from common.utils import get_product
+from common import llm
 
 # Create your views here.
 def check_favorite(request, product_code):
@@ -63,11 +64,9 @@ def send_chat(request):
         if c.id != chat_id:
             continue
         
-        c.add_chat(True, user_input)
+        response = llm.add_chat(c, user_input)
 
-        response = "안녕"
-
-        return JsonResponse({"response":f"사용자 입력: {user_input} > ai 답변: {response}"})
+        return JsonResponse({"response": response})
 
     return JsonResponse({"response": ""})
 
