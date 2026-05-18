@@ -1,3 +1,11 @@
+import warnings
+from langchain_core._api.deprecation import LangChainPendingDeprecationWarning
+
+warnings.filterwarnings(
+    "ignore",
+    category=LangChainPendingDeprecationWarning
+)
+
 from typing_extensions import TypedDict
 from typing import Literal
 from django.urls import reverse
@@ -318,6 +326,7 @@ def product_classification_node(state: GraphState) -> GraphState:
     rstate["product_type"] = product_type
     if product_type:
         rstate["state"] = "context"
+        rstate["slots"] = {}
     else:
         rstate["next_state"] = "initial"
         rstate["response"] = "먼저 검색할 상품군을 지정해주세요\n가능한 상품군 목록:\nTV, 에어컨, 냉장고, 청소기, 세탁기"
@@ -620,8 +629,6 @@ def add_chat(room:Chatroom, user_input:str) -> str:
 
     result = graph_instance.invoke(state)
     response_tail = result.get("response_tail", "")
-    if response_tail != "":
-        response_tail = "\n" + response_tail
 
     room.agent_state["state"] = result["next_state"]
     room.agent_state["product_type"] = result.get("product_type", "")
@@ -631,4 +638,4 @@ def add_chat(room:Chatroom, user_input:str) -> str:
 
     room.add_chat(False, result["response"])
 
-    return result["response"] + response_tail
+    return result["response"], response_tail
