@@ -78,10 +78,13 @@ def _convert_filter_value(field, lookup, value):
 
 
 def _split_condition_key(key, field_names):
-    for lookup in LOOKUPS:
-        suffix = f"_{lookup}"
-        if key.endswith(suffix):
-            field_name = key[:-len(suffix)]
+    # Web GET uses Django keys (price__gte); LLM slots use price_gte, name_icontains, etc.
+    for lookup in sorted(LOOKUPS, key=len, reverse=True):
+        for sep in ("__", "_"):
+            suffix = f"{sep}{lookup}"
+            if not key.endswith(suffix):
+                continue
+            field_name = key[: -len(suffix)]
             if field_name in field_names:
                 return field_name, lookup
             return None, None
