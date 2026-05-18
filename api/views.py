@@ -49,14 +49,14 @@ def send_chat(request):
         return
     
     if not request.user.is_authenticated:
-        return JsonResponse({"response": ""})
+        return JsonResponse({"response": "", "response_tail":""})
         
     data = json.loads(request.body)
     chat_id = data.get("chat_id", None)
     user_input = data.get("user_input", None)
 
     if chat_id is None or user_input is None:
-        return JsonResponse({"response": ""})
+        return JsonResponse({"response": "", "response_tail":""})
     
     chat_id = int(chat_id)
 
@@ -64,9 +64,9 @@ def send_chat(request):
         if c.id != chat_id:
             continue
         
-        response = llm.add_chat(c, user_input)
+        response, response_tail = llm.add_chat(c, user_input)
 
-        return JsonResponse({"response": response})
+        return JsonResponse({"response": response, "response_tail":response_tail})
 
-    return JsonResponse({"response": ""})
+    return JsonResponse({"response": "", "response_tail":""})
 
