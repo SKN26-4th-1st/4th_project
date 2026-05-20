@@ -26,5 +26,8 @@
 <script>
     window.SEARCH_FILTER_OPTIONS_URL = "{% static 'data/search_filter_options.json' %}";
 </script>
+<!-- REFACTOR (유지보수성): searchpage.js의 대형 로직을 역할별 모듈로 분리 -->
+<script src="{% static 'js/search/filter.js' %}"></script>
+<script src="{% static 'js/search/pagination.js' %}"></script>
 <script src="{% static 'js/searchpage.js' %}"></script>
 {% endblock %}
