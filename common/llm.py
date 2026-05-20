@@ -450,7 +450,7 @@ def answer_without_result_node(state: GraphState) -> GraphState:
     subq["product_type"] = state["product_type"]
 
     base_url = reverse("products:searchpage")
-    url = f"{state["root_url"]}/{base_url}?{urlencode(subq)}"
+    url = f"{state['root_url']}/{base_url}?{urlencode(subq, doseq=True)}"
 
     rstate = deepcopy(state)
     rstate["next_state"] = "context"
